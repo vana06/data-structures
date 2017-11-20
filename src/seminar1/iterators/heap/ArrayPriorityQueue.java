@@ -1,5 +1,5 @@
-package seminar1.collections;
-import java.lang.reflect.Array;
+package seminar1.iterators.heap;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -15,6 +15,11 @@ public class ArrayPriorityQueue<Key extends Comparable<Key>> implements IPriorit
     public ArrayPriorityQueue() {
         /* TODO: implement it — O(n) ???*/
         elementData = (Key[]) new Comparable[DEFAULT_INITIAL_CAPACITY];
+    }
+
+    public ArrayPriorityQueue(int initialSize) {
+        /* TODO: implement it — O(n) ???*/
+        elementData = (Key[]) new Comparable[initialSize];
     }
 
     public ArrayPriorityQueue(Comparator<Key> comparator) {

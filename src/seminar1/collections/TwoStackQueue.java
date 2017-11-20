@@ -1,5 +1,4 @@
 package seminar1.collections;
-
 import java.util.Iterator;
 
 public class TwoStackQueue<Item> implements IQueue<Item> {
@@ -8,30 +7,33 @@ public class TwoStackQueue<Item> implements IQueue<Item> {
     private IStack<Item> stack2;
 
     public TwoStackQueue() {
-        /* TODO: implement it */
+        stack1 = new LinkedStack<>();
+        stack2 = new LinkedStack<>();
     }
 
     @Override
     public void enqueue(Item item) {
-        /* TODO: implement it */
+        stack1.push(item);
     }
 
     @Override
     public Item dequeue() {
-        /* TODO: implement it */
-        return null;
+        swap(stack1, stack2);
+        Item item = stack2.pop();
+        swap(stack2, stack1);
+        return item;
     }
 
     @Override
     public boolean isEmpty() {
-        /* TODO: implement it */
+        if(!stack1.isEmpty() && !stack2.isEmpty())
+            return false;
         return true;
     }
 
     @Override
     public int size() {
-        /* TODO: implement it */
-        return 0;
+        return stack1.size();
     }
 
     @Override
@@ -40,4 +42,9 @@ public class TwoStackQueue<Item> implements IQueue<Item> {
         return null;
     }
 
+    private void swap(IStack<Item> stack1, IStack<Item> stack2){
+        while (!stack1.isEmpty()){
+            stack2.push(stack1.pop());
+        }
+    }
 }

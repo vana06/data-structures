@@ -1,5 +1,4 @@
 package seminar1.collections;
-
 import java.util.Iterator;
 
 public class LinkedStack<Item> implements IStack<Item> {
@@ -9,13 +8,25 @@ public class LinkedStack<Item> implements IStack<Item> {
 
     @Override
     public void push(Item item) {
-        /* TODO: implement it */
+        if(size == 0){
+            head = new Node<>(item, null);
+            size++;
+            return;
+        }
+        Node<Item> old = head;
+        while (old.next != null)
+            old = old.next;
+        old.next = new Node<>(item, null);
+        size++;
     }
 
     @Override
     public Item pop() {
-        /* TODO: implement it */
-        return null;
+        if(size == 0)
+            return null;
+        Item result = iterator().next();
+        size--;
+        return result;
     }
 
     @Override
@@ -35,16 +46,26 @@ public class LinkedStack<Item> implements IStack<Item> {
 
     private class LinkedStackIterator implements Iterator<Item> {
 
+        private Node<Item> curr = head;
+        private int currentPos = size;
+
         @Override
         public boolean hasNext() {
-            /* TODO: implement it */
+            if(currentPos != 0)
+                return true;
             return false;
         }
 
         @Override
         public Item next() {
-            /* TODO: implement it */
-            return null;
+            if(!hasNext())
+                return null;
+            if(currentPos == 1)
+                return curr.item;
+            while(--currentPos > 0){
+                curr = curr.next;
+            }
+            return curr.item;
         }
 
     }

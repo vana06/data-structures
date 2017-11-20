@@ -1,5 +1,4 @@
 package seminar1.collections;
-
 import java.util.Iterator;
 
 public class LinkedQueue<Item> implements IQueue<Item> {
@@ -11,12 +10,25 @@ public class LinkedQueue<Item> implements IQueue<Item> {
 
     @Override
     public void enqueue(Item item) {
-        /* TODO: implement it */
+        if(size == 0){
+            tail = head = new Node<Item>(item, null);
+            size++;
+            return;
+        }
+        Node<Item> newNode = new Node<Item>(item, null);
+        head.next = newNode;
+        head = newNode;
+        size++;
     }
 
     @Override
     public Item dequeue() {
-        /* TODO: implement it */
+        if(size != 0) {
+            Iterator<Item> iterator = iterator();
+            tail = tail.next;
+            size--;
+            return iterator.next();
+        }
         return null;
     }
 
@@ -37,15 +49,22 @@ public class LinkedQueue<Item> implements IQueue<Item> {
 
     private class LinkedQueueIterator implements Iterator<Item> {
 
+        Node<Item> curr = tail;
+
         @Override
         public boolean hasNext() {
-            /* TODO: implement it */
+            if(curr != null)
+                return true;
             return false;
         }
 
         @Override
         public Item next() {
-            /* TODO: implement it */
+            if(hasNext()) {
+                Item item = curr.item;
+                curr = curr.next;
+                return item;
+            }
             return null;
         }
 

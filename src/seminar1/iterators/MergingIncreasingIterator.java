@@ -1,5 +1,4 @@
 package seminar1.iterators;
-
 import java.util.Iterator;
 
 /**
@@ -15,22 +14,41 @@ public class MergingIncreasingIterator implements Iterator<Integer> {
 
     private IncreasingIterator first;
     private IncreasingIterator second;
+    private Integer a,b;
 
     public MergingIncreasingIterator(IncreasingIterator first, IncreasingIterator second) {
         this.first = first;
         this.second = second;
-        /* TODO: implement it */
+        a = first.next();
+        b = second.next();
     }
 
     @Override
     public boolean hasNext() {
-        /* TODO: implement it */
+        if(first.hasNext() || second.hasNext())
+            return true;
         return false;
     }
 
     @Override
     public Integer next() {
-        /* TODO: implement it */
-        return null;
+        if(!hasNext())
+            return null;
+        Integer result;
+        if(!first.hasNext() && second.hasNext())
+            result = b = second.next();
+        if(!second.hasNext() && first.hasNext())
+            result = a = second.next();
+        if(first.hasNext() && second.hasNext() && a < b){
+            result = a;
+            if(first.hasNext())
+                a = first.next();
+        } else {
+            result = b;
+            if(second.hasNext())
+                b = second.next();
+        }
+        return result;
     }
+
 }

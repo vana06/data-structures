@@ -1,5 +1,4 @@
 package seminar1;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -21,7 +20,17 @@ public class ParenthesesSequence {
 
     // sequence = "()()" | "((((" | ")()(" | ...
     private static boolean isBalanced(String sequence) {
-        /* TODO: implement it */
+        int paren = 0;
+        for(int i = 0; i < sequence.length(); i++){
+            if(sequence.charAt(i) == LEFT_PAREN)
+                paren++;
+            else
+                paren--;
+            if(paren<0)
+                return false;
+        }
+        if(paren == 0)
+            return true;
         return false;
     }
 
