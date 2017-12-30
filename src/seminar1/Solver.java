@@ -24,38 +24,7 @@ public class Solver {
     private static final char DIVISION     = '/';
 
     private static double evaluate(String[] values) {
-        LinkedList<String> list = new LinkedList<>();
-        for (String str: values) {
-            list.push(str);
-        }
-
-
-        while (true) {
-            int parenIndex = 0;
-            for (int i = 0; i < list.size(); i++) {
-                if(parenIndex != 0){
-                    if(list.get(i).equals(String.valueOf(RIGHT_PAREN))){
-                        //считай
-                        parenIndex--;
-                        String[] str = (String[])list.getArray(parenIndex, i);
-                        String result = calculate(str);
-                        for(int j = parenIndex; j <= i; j++){
-                            list.remove(parenIndex);
-                        }
-                        list.insert(result, parenIndex);
-
-                        i -= parenIndex;
-                        parenIndex = 0;
-                        continue;
-                    }
-                }
-                if(list.get(i).equals(String.valueOf(LEFT_PAREN)))
-                    parenIndex = i + 1;
-            }
-            if(list.size() == 1)
-                break;
-        }
-        return Double.parseDouble(list.get(0));
+        return parse(values);
     }
 
     public static void main(String[] args) {
@@ -69,25 +38,46 @@ public class Solver {
         }
     }
 
-    private static String calculate(String str[]){
-        String result = "";
-        double a = Double.parseDouble(str[0]);
-        double b = Double.parseDouble(str[2]);
-        switch (str[1].charAt(0)){
-        case PLUS:
-            result = String.valueOf(a+b);
-            break;
-        case MINUS:
-            result = String.valueOf(a-b);
-            break;
-        case TIMES:
-            result = String.valueOf(a*b);
-            break;
-        case DIVISION:
-            result = String.valueOf(a/b);
-            break;
+    private static double parse(String[] values){
+        if(values.length == 1)
+            return Double.parseDouble(values[0]);
+
+        int parenCount = 0;
+        for (int i = 1; i < values.length - 1; i++) {
+            String temp = values[i];
+            if (temp.equals(Character.toString(LEFT_PAREN))) {
+                parenCount++;
+            } else if (temp.equals(Character.toString(RIGHT_PAREN))) {
+                parenCount--;
+            } else if (parenCount == 0 && isOperation(temp)) {
+                String[] left = new String[i - 1];
+                System.arraycopy(values, 1, left, 0, left.length);
+                String[] right = new String[values.length - (i+2)];
+                System.arraycopy(values, i + 1, right, 0, right.length);
+
+                return calculate(parse(left), parse(right), temp);
+            }
         }
-        return result;
+
+        return 0; //никогда не дойдет до этой точки при условии что выражение востроено правильно
     }
 
+    private static double calculate(double a, double b, String op){
+        switch (op.charAt(0)){
+        case PLUS:
+            return (a+b);
+        case MINUS:
+            return (a-b);
+        case TIMES:
+            return (a*b);
+        case DIVISION:
+            return (a/b);
+        }
+        return 0; //никогда не дойдет до этой точки при условии что выражение построено правильно
+    }
+
+    private static boolean isOperation(String str){
+        return str.equals(Character.toString(PLUS)) || str.equals(Character.toString(MINUS)) ||
+                str.equals(Character.toString(TIMES)) || str.equals(Character.toString(DIVISION));
+    }
 }

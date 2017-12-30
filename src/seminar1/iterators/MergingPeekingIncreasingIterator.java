@@ -2,8 +2,7 @@ package seminar1.iterators;
 import java.util.Comparator;
 import java.util.Iterator;
 
-import seminar1.iterators.heap.ArrayPriorityQueue;
-import seminar1.iterators.heap.Key;
+import seminar1.collections.ArrayPriorityQueue;
 
 /**
  * Итератор возвращающий последовательность из N возрастающих итераторов в порядке возрастания
@@ -18,43 +17,58 @@ import seminar1.iterators.heap.Key;
 public class MergingPeekingIncreasingIterator implements Iterator<Integer> {
 
     private Comparator<PeekingIncreasingIterator> comparator = (p1, p2) -> p1.peek().compareTo(p2.peek());
-    PeekingIncreasingIterator[] peekingIterator;
-    ArrayPriorityQueue<Key> arrayPriorityQueue;
+    private ArrayPriorityQueue<Element> arrayPriorityQueue;
 
-    public MergingPeekingIncreasingIterator(IPeekingIterator... peekingIterator) {
-        this.peekingIterator = new PeekingIncreasingIterator[peekingIterator.length];
-        arrayPriorityQueue = new ArrayPriorityQueue<Key>(peekingIterator.length);
+    MergingPeekingIncreasingIterator(IPeekingIterator... peekingIterator) {
+        arrayPriorityQueue = new ArrayPriorityQueue<>(peekingIterator.length);
         for (int i = 0; i < peekingIterator.length; i++) {
-            this.peekingIterator[i] = (PeekingIncreasingIterator)peekingIterator[i];
-            Key key = new Key(i, (Integer)peekingIterator[i].peek());
-            arrayPriorityQueue.add(key);
+            arrayPriorityQueue.add(new Element(peekingIterator[i]));
         }
     }
 
     @Override
     public boolean hasNext() {
-        for(PeekingIncreasingIterator pii: peekingIterator){
-            if(pii.hasNext())
-                return true;
-        }
-        return false;
+        return arrayPriorityQueue.size() != 0;
     }
 
     @Override
     public Integer next() {
-        if(!hasNext())
-            return null;
-        Key min = arrayPriorityQueue.extractMin();
-        if(peekingIterator[min.arrayNum].hasNext())
-            arrayPriorityQueue.add(new Key(min.arrayNum, peekingIterator[min.arrayNum].next()));
-        else{
-            for(int i = 0; i < peekingIterator.length; i++){
-                if(peekingIterator[i].hasNext()) {
-                    arrayPriorityQueue.add(new Key(i, peekingIterator[i].next()));
-                }
-            }
+        Element element = arrayPriorityQueue.extractMin();
+        Integer min = element.key;
+        if(element.iterator.hasNext())
+            arrayPriorityQueue.add(new Element(element.iterator));
+        return min;
+    }
+
+    private class Element implements Comparable<Element>{
+
+        Integer key;
+        IPeekingIterator<Integer> iterator;
+
+        Element(IPeekingIterator<Integer> iterator) {
+            this.iterator = iterator;
+            if(iterator.hasNext())
+                this.key = iterator.next();
         }
 
-        return min.item;
+        @Override
+        public int compareTo(Element o) {
+            if(key > o.key)
+                return 1;
+            else if(key > o.key)
+                return -1;
+            else
+                return 0;
+        }
+    }
+
+    public static void main(String[] args) {
+        IPeekingIterator<Integer> first = new PeekingIncreasingIterator(0, 10, 1);
+        IPeekingIterator<Integer> second = new PeekingIncreasingIterator(0, 15, 1);
+        MergingPeekingIncreasingIterator mpii = new MergingPeekingIncreasingIterator(first, second);
+
+        while (mpii.hasNext()){
+            System.out.println(mpii.next());
+        }
     }
 }

@@ -23,8 +23,7 @@ public class ArrayStack<Item> implements IStack<Item> {
 
     @Override
     public Item pop() {
-        Item result = iterator().next();
-        size--;
+        Item result = elementData[--size];
         if(elementData.length > DEFAULT_CAPACITY && size*4 <= elementData.length)
             shrink();
         return result;
@@ -68,9 +67,7 @@ public class ArrayStack<Item> implements IStack<Item> {
 
         @Override
         public Item next() {
-            if(hasNext())
-                return elementData[--currentPosition];
-            return null;
+            return elementData[--currentPosition];
         }
 
     }

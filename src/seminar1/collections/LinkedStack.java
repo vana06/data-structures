@@ -24,7 +24,19 @@ public class LinkedStack<Item> implements IStack<Item> {
     public Item pop() {
         if(size == 0)
             return null;
-        Item result = iterator().next();
+        if(size == 1) {
+            Item result = head.item;
+            head = null;
+            size--;
+            return result;
+        }
+
+        Node<Item> curr = head;
+        while (curr.next.next != null){
+            curr = curr.next;
+        }
+        Item result = curr.next.item;
+        curr.next = null;
         size--;
         return result;
     }
@@ -51,20 +63,17 @@ public class LinkedStack<Item> implements IStack<Item> {
 
         @Override
         public boolean hasNext() {
-            if(currentPos != 0)
-                return true;
-            return false;
+            return currentPos != 0;
         }
 
         @Override
         public Item next() {
-            if(!hasNext())
-                return null;
-            if(currentPos == 1)
-                return curr.item;
-            while(--currentPos > 0){
+            int temp = currentPos;
+            curr = head;
+            while(--temp > 0){
                 curr = curr.next;
             }
+            currentPos--;
             return curr.item;
         }
 

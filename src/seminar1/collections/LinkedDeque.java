@@ -35,14 +35,16 @@ public class LinkedDeque<Item> implements IDeque<Item> {
 
     @Override
     public Item popFront() {
-        ListIterator<Item> iterator = iterator();
-        return iterator.previous();
+        Item result = head.item;
+        head = head.previous;
+        return result;
     }
 
     @Override
     public Item popBack() {
-        ListIterator<Item> iterator = iterator();
-        return iterator.next();
+        Item result = tail.item;
+        tail = tail.next;
+        return result;
     }
 
     @Override
@@ -56,11 +58,11 @@ public class LinkedDeque<Item> implements IDeque<Item> {
     }
 
     @Override
-    public ListIterator<Item> iterator() {
+    public IListIterator<Item> iterator() {
         return new LinkedDequeIterator();
     }
 
-    private class LinkedDequeIterator implements ListIterator<Item> {
+    private class LinkedDequeIterator implements IListIterator<Item> {
 
         Node<Item> currHead = head, currTail = tail;
 
@@ -69,50 +71,23 @@ public class LinkedDeque<Item> implements IDeque<Item> {
             return (currTail != null);
         }
 
+        @Override
         public boolean hasPrevious() {
             return (currHead != null);
         }
 
         @Override
         public Item next() {
-            if(!hasPrevious())
-                return null;
-            Item result = tail.item;
-            tail = tail.next;
+            Item result = currTail.item;
+            currTail = currTail.next;
             return result;
         }
 
+        @Override
         public Item previous() {
-            if(!hasNext())
-                return null;
-            Item result = head.item;
-            head = head.previous;
+            Item result = currHead.item;
+            currHead = currHead.previous;
             return result;
-        }
-
-        @Override
-        public int nextIndex() {
-            return 0;
-        }
-
-        @Override
-        public int previousIndex() {
-            return 0;
-        }
-
-        @Override
-        public void remove() {
-
-        }
-
-        @Override
-        public void set(Item item) {
-
-        }
-
-        @Override
-        public void add(Item item) {
-
         }
     }
 
@@ -128,6 +103,17 @@ public class LinkedDeque<Item> implements IDeque<Item> {
             this.item = item;
             this.next = next;
             this.previous = previous;
+        }
+    }
+
+    public static void main(String[] args) {
+        LinkedDeque<Integer> deque = new LinkedDeque<>();
+        deque.pushBack(1);
+        deque.pushBack(2);
+        deque.pushBack(3);
+        IListIterator<Integer> iterator = deque.iterator();
+        while (iterator.hasNext()) {
+            System.out.println(iterator.next());
         }
     }
 }

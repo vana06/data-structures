@@ -33,7 +33,10 @@ public class TwoStackQueue<Item> implements IQueue<Item> {
 
     @Override
     public int size() {
-        return stack1.size();
+        if(!stack1.isEmpty())
+            return stack1.size();
+        else
+            return stack2.size();
     }
 
     @Override

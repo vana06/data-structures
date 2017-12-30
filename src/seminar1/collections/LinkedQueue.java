@@ -15,7 +15,7 @@ public class LinkedQueue<Item> implements IQueue<Item> {
             size++;
             return;
         }
-        Node<Item> newNode = new Node<Item>(item, null);
+        Node<Item> newNode = new Node<>(item, null);
         head.next = newNode;
         head = newNode;
         size++;
@@ -23,13 +23,13 @@ public class LinkedQueue<Item> implements IQueue<Item> {
 
     @Override
     public Item dequeue() {
-        if(size != 0) {
-            Iterator<Item> iterator = iterator();
-            tail = tail.next;
-            size--;
-            return iterator.next();
+        if(size == 0) {
+            return null;
         }
-        return null;
+        Item result = tail.item;
+        tail = tail.next;
+        size--;
+        return result;
     }
 
     @Override
@@ -53,19 +53,14 @@ public class LinkedQueue<Item> implements IQueue<Item> {
 
         @Override
         public boolean hasNext() {
-            if(curr != null)
-                return true;
-            return false;
+            return curr != null;
         }
 
         @Override
         public Item next() {
-            if(hasNext()) {
-                Item item = curr.item;
-                curr = curr.next;
-                return item;
-            }
-            return null;
+            Item item = curr.item;
+            curr = curr.next;
+            return item;
         }
 
     }
@@ -82,5 +77,11 @@ public class LinkedQueue<Item> implements IQueue<Item> {
             this.item = item;
             this.next = next;
         }
+    }
+
+    public static void main(String[] args) {
+        LinkedQueue<Integer> queue = new LinkedQueue<>();
+        for (int i = 0; i < 1000; i++) queue.enqueue(i);
+        for (int i = 0; i < 10; i++) System.out.print(queue.dequeue() + " ");
     }
 }

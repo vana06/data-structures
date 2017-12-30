@@ -1,8 +1,11 @@
 package seminar1;
 
+import seminar1.collections.LinkedStack;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Iterator;
 
 /**
  * ( 1 + ( ( 2 + 3 ) * ( 4 * 5 ) ) ) = 101
@@ -31,39 +34,7 @@ public class SolverExt {
     private static final char DIVISION     = '/';
 
     private static double evaluate(String[] values) {
-        LinkedList<String> list = new LinkedList<>();
-        for (String str: values) {
-            list.push(str);
-        }
-
-        while (true) {
-            int parenIndex = 0;
-            for (int i = 0; i < list.size(); i++) {
-                if(parenIndex != 0){
-                    if(list.get(i).equals(String.valueOf(RIGHT_PAREN))){
-                        //считай
-                        parenIndex--;
-                        String[] str = list.getArray(parenIndex, i);
-                        String result = calculate(str);
-                        for(int j = parenIndex; j <= i; j++){
-                            list.remove(parenIndex);
-                        }
-                        list.insert(result, parenIndex);
-
-                        i = -1;
-                        parenIndex = 0;
-                        continue;
-                    }
-                }
-                if(list.get(i).equals(String.valueOf(LEFT_PAREN)))
-                    parenIndex = i + 1;
-            }
-            if(list.size() == 1)
-                return Double.parseDouble(list.get(0));
-            if(parenIndex == 0)
-                break;
-        }
-        return Double.parseDouble(calculateComplex(list.getArray(-1, list.size())));
+        return parse(values);
     }
 
     public static void main(String[] args) {
@@ -77,77 +48,98 @@ public class SolverExt {
         }
     }
 
-    private static String calculate(String[] str){
-        String result = "";
-        double a = Double.parseDouble(str[0]);
-        double b = Double.parseDouble(str[2]);
-        switch (str[1].charAt(0)){
-        case PLUS:
-            result = String.valueOf(a+b);
-            break;
-        case MINUS:
-            result = String.valueOf(a-b);
-            break;
-        case TIMES:
-            result = String.valueOf(a*b);
-            break;
-        case DIVISION:
-            result = String.valueOf(a/b);
-            break;
+
+    private static double parse(String[] values){
+        LinkedStack<Double> numbers = new LinkedStack<>();
+        LinkedStack<String> operations = new LinkedStack<>();
+
+        if(values.length == 1)
+            return Double.parseDouble(values[0]);
+
+        int parenCount = 0, expBegin = 0, expEnd = values.length;
+        boolean insideParen = false;
+        for (int i = 0; i < values.length; i++) {
+            String temp = values[i];
+            if (temp.equals(Character.toString(LEFT_PAREN))) {
+                parenCount++;
+                if(!insideParen) {
+                    insideParen = true;
+                    expBegin = i;
+                }
+            } else if (temp.equals(Character.toString(RIGHT_PAREN))) {
+                parenCount--;
+                expEnd = i;
+            } else if(!insideParen){
+                if(isOperation(temp)){
+                    operations.push(temp);
+                } else{
+                    numbers.push(Double.parseDouble(temp));
+                }
+            }
+
+            if (insideParen && parenCount == 0) {
+                String[] expression = new String[expEnd - (expBegin +1)];
+                System.arraycopy(values, expBegin+1, expression, 0, expression.length);
+                numbers.push(parse(expression));
+                insideParen = false;
+            }
+        }
+
+        return calculate(numbers, operations);
+    }
+
+    private static double calculate(LinkedStack<Double> numbers, LinkedStack<String> operations){
+        LinkedStack<Double> tempNumbers = new LinkedStack<>();
+        LinkedStack<String> tempOperations = new LinkedStack<>();
+        Iterator<String> opIt = operations.iterator();
+        while(opIt.hasNext()){
+            String op = opIt.next();
+            if(op.equals(Character.toString(PLUS)) || op.equals(Character.toString(MINUS))){
+                tempNumbers.push(numbers.pop());
+                tempOperations.push(op);
+            } else {
+                if(op.equals(Character.toString(TIMES))){
+                    double a = numbers.pop();
+                    double b = numbers.pop();
+                    double res = a*b;
+                    numbers.push(res);
+                } else { //DIVIDE
+                    double a = numbers.pop();
+                    double b = numbers.pop();
+                    double res = b/a;
+                    numbers.push(res);
+                }
+            }
+        }
+        if(numbers.size()!=0){
+            tempNumbers.push(numbers.pop());
+        }
+
+
+        if(tempNumbers.size() == 1) {
+            return tempNumbers.pop();
+        }
+        opIt = tempOperations.iterator();
+        double result = 0;
+        while(opIt.hasNext()){
+            String op = opIt.next();
+            if(op.equals(Character.toString(PLUS))){
+                double a= tempNumbers.pop();
+                double b = tempNumbers.pop();
+                result = a+b;
+                tempNumbers.push(result);
+            } else { //MINUS
+                double a= tempNumbers.pop();
+                double b = tempNumbers.pop();
+                result = a-b;
+                tempNumbers.push(result);
+            }
         }
         return result;
     }
-    private static String calculateComplex(String[] str){
-        LinkedList<String> list = new LinkedList<>();
-        for (String value: str) {
-            list.push(value);
-        }
-        for(int i = 0; i < list.size(); i++){
-            String operation = list.get(i);
-            if(operation.charAt(0) == TIMES){
-                Double a = Double.parseDouble(list.get(i-1));
-                Double b = Double.parseDouble(list.get(i+1));
-                Double num = a * b;
-                list.remove(i+1);
-                list.remove(i);
-                list.remove(i - 1);
-                list.insert(String.valueOf(num), i-1);
-                i = -1;
-            }
-            if(operation.charAt(0) == DIVISION){
-                Double a = Double.parseDouble(list.get(i-1));
-                Double b = Double.parseDouble(list.get(i+1));
-                Double num = a / b;
-                list.remove(i+1);
-                list.remove(i);
-                list.remove(i - 1);
-                list.insert(String.valueOf(num), i-1);
-                i = -1;
-            }
-        }
-        while (list.size() != 1) {
-            for (int i = 0; i < list.size(); i++) {
-                String operation = list.get(i);
-                if (operation.charAt(0) == PLUS) {
-                    Double a = Double.parseDouble(list.get(i - 1));
-                    Double b = Double.parseDouble(list.get(i + 1));
-                    Double num = a + b;
-                    list.remove(i + 1);
-                    list.remove(i);
-                    list.remove(i - 1);
-                    list.insert(String.valueOf(num), i - 1);
-                }
-                if (operation.charAt(0) == MINUS) {
-                    Double a = Double.parseDouble(list.get(i - 1));
-                    Double b = Double.parseDouble(list.get(i + 1));
-                    Double num = a - b;
-                    list.remove(i + 1);
-                    list.remove(i);
-                    list.remove(i - 1);
-                    list.insert(String.valueOf(num), i - 1);
-                }
-            }
-        }
-        return list.get(0);
+
+    private static boolean isOperation(String str){
+        return str.equals(Character.toString(PLUS)) || str.equals(Character.toString(MINUS)) ||
+                str.equals(Character.toString(TIMES)) || str.equals(Character.toString(DIVISION));
     }
 }

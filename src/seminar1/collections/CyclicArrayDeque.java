@@ -12,16 +12,17 @@ public class CyclicArrayDeque<Item> implements IDeque<Item> {
 
     CyclicArrayDeque(){
         elementData = (Item[])new Object[DEFAULT_CAPACITY];
+        tail = -1;
+        head = 0;
     }
 
     @Override
     public void pushFront(Item item) {
         if(size == elementData.length)
             grow();
-        if(head == elementData.length - 1)
+        if(head == elementData.length)
             head = 0;
-        elementData[head] = item;
-        head++;
+        elementData[head++] = item;
         size++;
     }
 
@@ -29,18 +30,22 @@ public class CyclicArrayDeque<Item> implements IDeque<Item> {
     public void pushBack(Item item) {
         if(size == elementData.length)
             grow();
-        if(tail == 0)
+        if(tail == -1)
             tail = elementData.length - 1;
-        elementData[tail] = item;
-        tail--;
+        elementData[tail--] = item;
         size++;
     }
 
     @Override
     public Item popFront() {
-        Item result = iterator().previous();
+        if(head == 0)
+            head = elementData.length;
+        Item result = elementData[head--];
+        size--;
+
         if(size == 0){
-            tail = head = 0;
+            tail = -1;
+            head = 0;
         }
         if(elementData.length > DEFAULT_CAPACITY && size*4 <= elementData.length)
             shrink();
@@ -49,9 +54,14 @@ public class CyclicArrayDeque<Item> implements IDeque<Item> {
 
     @Override
     public Item popBack() {
-        Item result = iterator().next();
+        if(tail == elementData.length - 1)
+            tail = -1;
+        Item result = elementData[++tail];
+        size--;
+
         if(size == 0){
-            tail = head = 0;
+            tail = -1;
+            head = 0;
         }
         if(elementData.length > DEFAULT_CAPACITY && size*4 <= elementData.length)
             shrink();
@@ -90,69 +100,71 @@ public class CyclicArrayDeque<Item> implements IDeque<Item> {
     }
 
     @Override
-    public ListIterator<Item> iterator() {
+    public IListIterator<Item> iterator() {
         return new CyclicArrayDequeIterator();
     }
 
-    private class CyclicArrayDequeIterator implements ListIterator<Item> {
+    private class CyclicArrayDequeIterator implements IListIterator<Item> {
+
+        private int currentBack = tail, currentFront = head;
 
         @Override
         public boolean hasNext() {
-            return size != 0;
+            return (currentBack+1)%elementData.length != currentFront;
         }
 
+        @Override
         public boolean hasPrevious() {
-            return size != 0;
+            return currentFront != (currentBack+1)%elementData.length;
         }
 
         @Override
         public Item next() {
-            if(hasNext()) {
-                if(tail == elementData.length - 1)
-                    tail = -1;
-                Item item = elementData[tail+1];
-                tail++;
-                size--;
-                return item;
-            }
-            return null;
+            if(currentBack == elementData.length)
+                currentBack = 0;
+            return elementData[++currentBack];
         }
 
+        @Override
         public Item previous() {
-            if(hasPrevious()) {
-                if(head == 0)
-                    head = elementData.length;
-                Item item = elementData[head-1];
-                head--;
-                size--;
-                return item;
-            }
-            return null;
+            if(currentFront == -1)
+                currentFront = elementData.length - 1;
+            return elementData[--currentFront];
         }
 
-        @Override
-        public int nextIndex() {
-            return 0;
+    }
+
+    public static void main(String[] args) {
+        CyclicArrayDeque<Integer> array = new CyclicArrayDeque<>();
+        array.pushFront(1);
+        array.pushFront(2);
+        array.pushFront(3);
+        array.pushFront(4);
+
+        System.out.println(array.popBack());
+        System.out.println(array.popBack());
+        System.out.println(array.popBack());
+        System.out.println(array.popBack());
+
+
+        CyclicArrayDeque<Integer> deque = new CyclicArrayDeque<>();
+        deque.pushBack(3);
+        deque.pushBack(2);
+        deque.pushBack(1);
+        IListIterator<Integer> iterator = deque.iterator();
+        while (iterator.hasNext()) {
+            System.out.println(iterator.next());
         }
+        System.out.println("size = " + deque.size());
 
-        @Override
-        public int previousIndex() {
-            return 0;
+        deque = new CyclicArrayDeque<>();
+        deque.pushFront(3);
+        deque.pushFront(2);
+        deque.pushFront(1);
+        iterator = deque.iterator();
+        while (iterator.hasPrevious()) {
+            System.out.println(iterator.previous());
         }
-
-        @Override
-        public void remove() {
-
-        }
-
-        @Override
-        public void set(Item item) {
-
-        }
-
-        @Override
-        public void add(Item item) {
-
-        }
+        System.out.println("size = " + deque.size());
     }
 }

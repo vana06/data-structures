@@ -1,4 +1,6 @@
 package seminar1.iterators;
+import seminar1.collections.ArrayPriorityQueue;
+
 import java.util.Iterator;
 
 /**
@@ -14,41 +16,46 @@ public class MergingIncreasingIterator implements Iterator<Integer> {
 
     private IncreasingIterator first;
     private IncreasingIterator second;
-    private Integer a,b;
+    private ArrayPriorityQueue<Integer> queue;
 
     public MergingIncreasingIterator(IncreasingIterator first, IncreasingIterator second) {
         this.first = first;
         this.second = second;
-        a = first.next();
-        b = second.next();
+        queue = new ArrayPriorityQueue<>();
+        if(first.hasNext()) {
+            queue.add(first.next());
+        }
+        if(second.hasNext()) {
+            queue.add(second.next());
+        }
     }
 
     @Override
     public boolean hasNext() {
-        if(first.hasNext() || second.hasNext())
-            return true;
-        return false;
+        return queue.size() != 0;
     }
 
     @Override
     public Integer next() {
-        if(!hasNext())
-            return null;
-        Integer result;
-        if(!first.hasNext() && second.hasNext())
-            result = b = second.next();
-        if(!second.hasNext() && first.hasNext())
-            result = a = second.next();
-        if(first.hasNext() && second.hasNext() && a < b){
-            result = a;
-            if(first.hasNext())
-                a = first.next();
-        } else {
-            result = b;
-            if(second.hasNext())
-                b = second.next();
+        Integer result = queue.extractMin();
+        if(first.hasNext()) {
+            queue.add(first.next());
         }
+        if(second.hasNext()) {
+            queue.add(second.next());
+        }
+
         return result;
+    }
+
+    public static void main(String[] args) {
+        IncreasingIterator first = new IncreasingIterator(0, 10, 2);
+        IncreasingIterator second = new IncreasingIterator(0, 15, 2);
+        MergingIncreasingIterator mii = new MergingIncreasingIterator(first, second);
+
+        while (mii.hasNext()){
+            System.out.println(mii.next());
+        }
     }
 
 }

@@ -10,8 +10,10 @@ public class CyclicArrayQueue<Item> implements IQueue<Item> {
     private int size;
     private int tail, head;
 
-    CyclicArrayQueue(){
+    public CyclicArrayQueue(){
         elementData = (Item[]) new Object[DEFAULT_CAPACITY];
+        tail = 0;
+        head = 0;
     }
 
     @Override
@@ -25,7 +27,7 @@ public class CyclicArrayQueue<Item> implements IQueue<Item> {
 
     @Override
     public Item dequeue() {
-        Item result = iterator().next();
+        Item result = elementData[tail%elementData.length];
         if(result != null) {
             size--;
             tail++;
@@ -37,9 +39,7 @@ public class CyclicArrayQueue<Item> implements IQueue<Item> {
 
     @Override
     public boolean isEmpty() {
-        if(size == 0)
-            return true;
-        return false;
+        return size == 0;
     }
 
     @Override
@@ -65,7 +65,7 @@ public class CyclicArrayQueue<Item> implements IQueue<Item> {
         }
         elementData = temp;
         tail = 0;
-        head = size-1;
+        head = size;
     }
 
     @Override
@@ -76,23 +76,24 @@ public class CyclicArrayQueue<Item> implements IQueue<Item> {
     private class CyclicArrayQueueIterator implements Iterator<Item> {
 
         int currentPosition = tail;
-        int currentSize = size;
 
         @Override
         public boolean hasNext() {
-            return currentSize != 0;
+            return currentPosition != head;
         }
 
         @Override
         public Item next() {
-            if(hasNext()) {
-                Item item = elementData[currentPosition%elementData.length];
-                currentPosition++;
-                currentSize--;
-                return item;
-            }
-            return null;
+            Item item = elementData[currentPosition%elementData.length];
+            currentPosition++;
+            return item;
         }
 
+    }
+
+    public static void main(String[] args) {
+        CyclicArrayQueue<Integer> queue = new CyclicArrayQueue<>();
+        for (int i = 0; i < 1000; i++) queue.enqueue(i);
+        for (int i = 0; i < 10; i++) System.out.print(queue.dequeue() + " ");
     }
 }

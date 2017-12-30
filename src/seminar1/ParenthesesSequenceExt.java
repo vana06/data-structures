@@ -25,13 +25,17 @@ public class ParenthesesSequenceExt {
     // sequence = "()()" | "(({}[]))[[[" | "{}" | ...
     private static boolean isBalanced(String sequence) {
         int paren = 0, brace = 0, bracket = 0;
+        char lastOpen = ' ';
         for(int i = 0; i < sequence.length(); i++){
             switch (sequence.charAt(i)){
             case LEFT_PAREN:{
                 paren++;
+                lastOpen = LEFT_PAREN;
                 break;
             }
             case RIGHT_PAREN:{
+                if(lastOpen != LEFT_PAREN)
+                    return false;
                 paren--;
                 if(paren < 0)
                     return false;
@@ -39,9 +43,12 @@ public class ParenthesesSequenceExt {
             }
             case LEFT_BRACE:{
                 brace++;
+                lastOpen = LEFT_BRACE;
                 break;
             }
             case RIGHT_BRACE:{
+                if(lastOpen != LEFT_BRACE)
+                    return false;
                 brace--;
                 if(brace < 0)
                     return false;
@@ -49,9 +56,12 @@ public class ParenthesesSequenceExt {
             }
             case LEFT_BRACKET:{
                 bracket++;
+                lastOpen = LEFT_BRACKET;
                 break;
             }
             case RIGHT_BRACKET:{
+                if(lastOpen != LEFT_BRACKET)
+                    return false;
                 bracket--;
                 if(bracket < 0)
                     return false;

@@ -1,5 +1,5 @@
 package seminar1.collections;
-import java.lang.reflect.Array;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -13,12 +13,14 @@ public class ArrayPriorityQueue<Key extends Comparable<Key>> implements IPriorit
     private int size = 0;
 
     public ArrayPriorityQueue() {
-        /* TODO: implement it — O(n) ???*/
         elementData = (Key[]) new Comparable[DEFAULT_INITIAL_CAPACITY];
     }
 
+    public ArrayPriorityQueue(int initialSize) {
+        elementData = (Key[]) new Comparable[initialSize];
+    }
+
     public ArrayPriorityQueue(Comparator<Key> comparator) {
-        /* TODO: implement it — O(n) ???*/
         elementData = (Key[]) new Comparable[DEFAULT_INITIAL_CAPACITY];
         this.comparator = comparator;
     }
@@ -43,7 +45,12 @@ public class ArrayPriorityQueue<Key extends Comparable<Key>> implements IPriorit
 
     @Override
     public Key extractMin() {
-        Key result = iterator().next();
+        if(size == 0)
+            return null;
+        size--;
+        Key result = elementData[0];
+        elementData[0] = elementData[size];
+        siftDown(0);
         if(elementData.length > DEFAULT_INITIAL_CAPACITY && size*4 <= elementData.length)
             shrink();
         return result;
@@ -125,18 +132,38 @@ public class ArrayPriorityQueue<Key extends Comparable<Key>> implements IPriorit
 
     private class ArrayPriorityQueueIterator implements Iterator<Key>{
 
+        private int currentPos = 0;
+
         @Override
         public boolean hasNext() {
-            return size != 0;
+            return currentPos != size;
         }
 
         @Override
         public Key next() {
-            Key result = elementData[0];
-            size--;
-            elementData[0] = elementData[size];
-            siftDown(0);
-            return result;
+            return elementData[currentPos++];
         }
+    }
+
+    public static void main(String[] args) {
+        ArrayPriorityQueue<Integer> array = new ArrayPriorityQueue<>();
+        array.add(4);
+        array.add(5);
+        array.add(0);
+        array.add(11);
+        System.out.println(array.extractMin());
+        System.out.println(array.extractMin());
+        System.out.println(array.extractMin());
+        System.out.println(array.extractMin());
+        System.out.println(array.extractMin());
+
+        array.add(4);
+        array.add(5);
+        array.add(0);
+        array.add(11);
+        Iterator<Integer> it = array.iterator();
+        while (it.hasNext())
+            System.out.println(it.next());
+
     }
 }
